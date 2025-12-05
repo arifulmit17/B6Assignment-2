@@ -1,10 +1,12 @@
 import express from 'express'
 import { initDB } from './database/db'
 import { authRoute } from './modules/auth/auth.route'
+import config from './config'
+
 
 const app=express()
 app.use(express.json())
-
+const port=config.port 
 
 initDB()
 
@@ -18,6 +20,6 @@ app.get('/',(req,res)=>{
     })
 })
 
-app.listen(5000,()=>{
-    console.log("Server is running on port 5000");
+app.listen(port,()=>{
+    console.log(`Server is running on port ${port}`);
 })
