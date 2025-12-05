@@ -1,14 +1,15 @@
 import { Request, Response } from "express"
-import { authService } from "./auth.service"
+import { vehicleService } from "./vehicles.service"
 
 
-const createUser=async (req:Request ,res:Response)=>{
+
+const createVehicles=async (req:Request ,res:Response)=>{
     try {
        
-     const result=await authService.createUserIntoDB(req.body)
+     const result=await vehicleService.createVehicleIntoDB(req.body)
     return res.status(201).json({
         success:true,
-        message:"User registered successfully",
+        message:"Vehicle created successfully",
         user:result.rows[0]
     })
     } catch (error: any) {
@@ -20,6 +21,6 @@ const createUser=async (req:Request ,res:Response)=>{
     }
 }
 
-export const authController={
-    createUser
+export const vehiclesController={
+    createVehicles
 }
