@@ -21,6 +21,103 @@ const createVehicles=async (req:Request ,res:Response)=>{
     }
 }
 
+const getAllVehicles=async (req:Request,res:Response)=>{
+   try{
+    const result = await vehicleService.getAllVehicleFromDB()
+     
+    res.status(200).json({
+        success:true,
+        message:"Vehicles retrieved successfully",
+        data:result.rows
+    })
+
+   }catch(err:any){
+    res.status(500).json({
+        success:false,
+        message:err.message,
+        details:err
+    })
+   }
+}
+const getVehicle=async (req:Request,res:Response)=>{
+   try{
+    const result = await vehicleService.getVehicleFromDB(req)
+     
+    res.status(200).json({
+        success:true,
+        message:"Vehicle retrieved successfully",
+        data:result.rows[0]
+    })
+
+   }catch(err:any){
+    res.status(500).json({
+        success:false,
+        message:err.message,
+        details:err
+    })
+   }
+}
+
+const updateVehicle=async (req:Request,res:Response)=>{
+    try{
+    const result = await vehicleService.updateVehicleFromDB(req)
+     
+    if(result.rows.length===0){
+       res.status(404).json({
+        success:false,
+        message:"Vehicle not found"
+       })
+    }
+    else{
+        res.status(200).json({
+            success:true,
+            message:"Vehicle updated successfully",
+            data:result.rows[0]
+        })
+       }
+    
+
+   }catch(err:any){
+    res.status(500).json({
+        success:false,
+        message:err.message,
+        details:err
+    })
+   }
+}
+const deleteVehicle=async (req:Request,res:Response)=>{
+    try{
+    const result = await vehicleService.deleteVehicleFromDB(req)
+    
+     
+    if(result.rows.length===0){
+       res.status(404).json({
+        success:false,
+        message:"Vehicle not found"
+       })
+    }
+    else{
+        res.status(200).json({
+            success:true,
+            message:"Vehicle deleted successfully",
+        })
+       }
+    
+
+   }catch(err:any){
+    res.status(500).json({
+        success:false,
+        message:err.message,
+        details:err
+    })
+   }
+}
+
+
 export const vehiclesController={
-    createVehicles
+    createVehicles,
+    getAllVehicles,
+    getVehicle,
+    updateVehicle,
+    deleteVehicle
 }
