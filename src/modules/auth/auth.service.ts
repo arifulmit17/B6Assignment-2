@@ -5,14 +5,21 @@ import jwt from "jsonwebtoken"
 
 const createUserIntoDB=async(payload:Record<string,unknown>)=>{
  const {name,email,password,phone,role}=payload
-    
-    const hashpassword=await bcrypt.hash(password as string,12)
-    const result= await pool.query(
+    if(String(password).length>5){
+        const hashpassword=await bcrypt.hash(password as string,12)
+         const result= await pool.query(
          `INSERT INTO users (name, email,password,phone,role) VALUES ($1, $2,$3,$4,$5) RETURNING *`,[name,email,hashpassword,phone,role]
     )
     delete result.rows[0].password
 
-    return result
+    return result.rows[0];
+    }else{
+        throw new Error("Password length must be 6 or above")
+        
+    }
+    
+    
+   
 }
 const loginUserIntoDB=async(email:string,password:string)=>{
    
