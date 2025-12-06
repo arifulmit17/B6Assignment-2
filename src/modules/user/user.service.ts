@@ -23,7 +23,7 @@ const updateUserFromDB=async (req:Request)=>{
 }
 const deleteUserFromDB=async (req:Request)=>{
    const result= await pool.query(
-            `DELETE FROM users WHERE id=$1 RETURNING *`,[req.params.id]
+            `DELETE FROM users WHERE id=$1 RETURNING *`,[req.params.userId]
        )
     return result
 }
