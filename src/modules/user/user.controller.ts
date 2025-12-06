@@ -1,24 +1,26 @@
 import { Request, Response } from "express"
 import { userService } from "./user.service"
+import { pool } from "../../database/db"
 
-const createUser=async (req:Request ,res:Response)=>{
-    try {
-       
-     const result=await userService.createUserIntoDB(req.body)
-    return res.status(201).json({
+const getAllUsers=async (req:Request,res:Response)=>{
+   try{
+    const result = await userService.getAllUserFromDB()
+     
+    res.status(200).json({
         success:true,
-        message:"User registered successfully",
-        user:result.rows[0]
+        message:"Users retrieved successfully",
+        data:result.rows
     })
-    } catch (error) {
-        res.status(500).json({
-            success:false,
-            message:"Server Error",
-            error:error
-        })
-    }
+
+   }catch(err:any){
+    res.status(500).json({
+        success:false,
+        message:err.message,
+        details:err
+    })
+   }
 }
 
 export const userController={
-    createUser
+   getAllUsers
 }

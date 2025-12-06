@@ -3,6 +3,7 @@ import { initDB } from './database/db'
 import { authRoute } from './modules/auth/auth.route'
 import config from './config'
 import { vehiclesRoute } from './modules/vehicles/vehicles.route'
+import { userRoute } from './modules/user/user.route'
 
 
 const app=express()
@@ -12,6 +13,7 @@ const port=config.port
 initDB()
 
 app.use('/api/v1/auth',authRoute)
+app.use('/api/v1/',userRoute)
 app.use('/api/v1/',vehiclesRoute)
 
 app.get('/',(req,res)=>{

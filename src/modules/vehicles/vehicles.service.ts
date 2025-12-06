@@ -3,7 +3,6 @@ import { pool } from "../../database/db"
 
 
 const createVehicleIntoDB=async(payload:Record<string,unknown>)=>{
-    console.log(payload);
  const {vehicle_name,type,registration_number,daily_rent_price,availability_status}=payload
  const price = Number(daily_rent_price);
  if(price >= 0){

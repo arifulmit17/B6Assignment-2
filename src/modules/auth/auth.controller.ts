@@ -19,7 +19,26 @@ const createUser=async (req:Request ,res:Response)=>{
         })
     }
 }
+const loginUser=async (req:Request ,res:Response)=>{
+    try {
+       const {email,password}=req.body
+
+     const result=await authService.loginUserIntoDB(email,password)
+    return res.status(200).json({
+        success:true,
+        message:"Login successfull",
+        data:result
+    })
+    } catch (error: any) {
+        res.status(500).json({
+            success:false,
+            message:error.message,
+            error:error
+        })
+    }
+}
 
 export const authController={
-    createUser
+    createUser,
+    loginUser
 }

@@ -4,6 +4,9 @@ import { userController } from "./user.controller";
 
 const router = Router();
 
-router.post('/signin',userController.createUser);
+
+router.get('/users',userController.getAllUsers);
+router.put('/users/:userId',userController.updateUser);
+// router.delete('/users/:userId',userController.deleteUser);
 
 export const userRoute= router;
