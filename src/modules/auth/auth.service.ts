@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
 import { pool } from "../../database/db"
 import jwt from "jsonwebtoken"
+import config from "../../config"
 
 
 const createUserIntoDB=async(payload:Record<string,unknown>)=>{
@@ -35,14 +36,17 @@ const loginUserIntoDB=async(email:string,password:string)=>{
     const user=result.rows[0]
     const match=await bcrypt.compare(password,user.password)
     console.log({match,user});
-    if(!match){
+    if(match==false){
         return false
     }
-
-    const secret="KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
-    const token=jwt.sign({name:user.name,role:user.role},secret,{expiresIn:'7d'})
-    console.log(token);
+    const token=jwt.sign({name:user.name,email:user.rmail,role:user.role},config.jwtSecret as string,{expiresIn:'7d'})
     return {token,user}
+
+
+    
+
+  
+    
 }
 
 export const authService={
