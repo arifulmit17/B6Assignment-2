@@ -6,13 +6,15 @@ import { JwtPayload } from 'jsonwebtoken';
 const auth=(...roles:string[])=>{
     return (req:Request,res:Response,next:NextFunction)=>{
         try{
-            const token=req.headers.authorization
+            const authtoken=req.headers.authorization
+            const token=authtoken?.split(" ")[1];
+            // console.log(token);
         if(!token){
             res.status(500).json({
                 message:"You are not allowed!"
             })
         }
-        console.log(roles);
+        // console.log(roles);
         const decoded=jwt.verify(token,config.jwtSecret as string) as JwtPayload
         console.log({decoded});
         req.user=decoded 

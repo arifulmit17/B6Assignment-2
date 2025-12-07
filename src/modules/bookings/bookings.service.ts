@@ -1,5 +1,5 @@
 import { pool } from "../../database/db"
-import { vehicleService } from "../vehicles/vehicles.service"
+
 
 
 
@@ -21,7 +21,7 @@ if (isNaN(start) || isNaN(end)) {
 
 const number_of_days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
-console.log("Days:", number_of_days);
+// console.log("Days:", number_of_days);
 
 if (end <= start) {
   throw new Error("End date must be after start date");
@@ -29,7 +29,7 @@ if (end <= start) {
 
 
 const total_price = daily_rent_price * number_of_days
- console.log(payload);
+//  console.log(payload);
 
  
    
@@ -41,25 +41,82 @@ const total_price = daily_rent_price * number_of_days
   ...result.rows[0],
   vehicle: {vehicle_name,daily_rent_price},
 }
-console.log(booking);
+// console.log(booking);
 return booking
 }else{
-    throw new Error("Invalid availability status. It should be either 'available' or 'booked'.")
+    throw new Error("Invalid availability status")
 }
     
 
  
 }
 
+const getAllBookingFromDBCustomer=async (userid)=>{
+    console.log(userid);
+   const result= await pool.query(
+            `SELECT * FROM bookings WHERE customer_id=$1`,[userid]
+       )
+
+
+    const bookings = [];
+
+for (let i = 0; i < result.rows.length; i++) {
+  const booking = result.rows[i];
+
+  const vehicleRes = await pool.query(
+    "SELECT * FROM vehicles WHERE id=$1",
+    [booking.vehicle_id]
+  );
+  const {vehicle_name,registration_number,type}=vehicleRes.rows[0]
+  const combined = {
+    ...booking,
+    vehicle: {vehicle_name,registration_number,type},
+  };
+
+  bookings.push(combined);
+}
+console.log(bookings);
+return bookings;
+
+    
+    
+}
 const getAllBookingFromDB=async ()=>{
    const result= await pool.query(
-            `SELECT * FROM vehicles`
+            `SELECT * FROM bookings`
        )
-    for(let i=0;i<result.rows.length;i++){
-      delete result.rows[i].password
-    }
+
+
+    const bookings: any[] = [];
+
+for (let i = 0; i < result.rows.length; i++) {
+  const booking = result.rows[i];
+
+  const customerRes = await pool.query(
+    "SELECT * FROM users WHERE id=$1",
+    [booking.customer_id]
+  );
+
+  const vehicleRes = await pool.query(
+    "SELECT * FROM vehicles WHERE id=$1",
+    [booking.vehicle_id]
+  );
+  const {vehicle_name,registration_number}=vehicleRes.rows[0]
+  const {name,email}=customerRes.rows[0]
+  
+  const combined = {
+    ...booking,
+    customer: {name,email},
+    vehicle: {vehicle_name,registration_number},
+  };
+
+  bookings.push(combined);
+}
+console.log(bookings);
+return bookings;
+
     
-    return result
+    
 }
 
 const updateBookingFromDB=async (req:Request)=>{
@@ -87,6 +144,7 @@ return result
 
 export const bookingsService={
     createBookingIntoDB,
+    getAllBookingFromDBCustomer,
     getAllBookingFromDB,
     updateBookingFromDB
    

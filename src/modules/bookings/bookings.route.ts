@@ -1,12 +1,15 @@
 import { Request, Response, Router } from "express";
 import { bookingsController } from "./bookings.controller";
+import auth from "../../middleware/auth";
 
 
 
 const router = Router();
 
-router.post('/bookings',bookingsController.createBookings);
-router.get('/bookings',bookingsController.getAllBookings);
+router.post('/bookings',auth(),bookingsController.createBookings);
+// router.get('/bookings',auth("customer"),bookingsController.getAllBookings);
+router.get('/bookings',auth(),bookingsController.getAllBookings);
+
 router.put('/bookings/:bookingId',bookingsController.updateBooking);
 
 

@@ -24,22 +24,24 @@ const createUserIntoDB=async(payload:Record<string,unknown>)=>{
 }
 const loginUserIntoDB=async(email:string,password:string)=>{
    
-    console.log({email});
+    // console.log({email});
     
     const result= await pool.query(
          `SELECT * FROM users WHERE email=$1`,[email]
     )
-    console.log({result});
+    // console.log({result});
     if(result.rows.length===0){
         return null
     }
     const user=result.rows[0]
+    console.log(user);
     const match=await bcrypt.compare(password,user.password)
-    console.log({match,user});
+    // console.log({match,user});
     if(match==false){
         return false
     }
-    const token=jwt.sign({name:user.name,email:user.rmail,role:user.role},config.jwtSecret as string,{expiresIn:'7d'})
+    const token=jwt.sign({id:user.id,name:user.name,email:user.email,role:user.role},config.jwtSecret as string,{expiresIn:'7d'})
+    console.log(token);
     return {token,user}
 
 

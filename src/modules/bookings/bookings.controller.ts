@@ -22,10 +22,15 @@ const createBookings=async (req:Request ,res:Response)=>{
 
 
 const getAllBookings=async (req:Request,res:Response)=>{
+    const userrole=req.user?.role
+    const userid=req.user?.id
+    
+    // console.log(userrole,userid);
    try{
-    const result = await bookingsService.getAllBookingFromDB()
-     
-    if(result.rows.length===0){
+    if(userrole=="admin"){
+        const result = await bookingsService.getAllBookingFromDB()
+        
+        if(result.length===0){
        res.status(404).json({
         success:false,
         message:"Booking not found"
@@ -34,8 +39,25 @@ const getAllBookings=async (req:Request,res:Response)=>{
         res.status(200).json({
         success:true,
         message:"Bookings retrieved successfully",
-        data:result.rows
+        data:result
     })
+    }
+}
+    if(userrole=="customer"){
+        const result = await bookingsService.getAllBookingFromDBCustomer(userid)
+        console.log(result);
+        if(result.length===0){
+       res.status(404).json({
+        success:false,
+        message:"Booking not found"
+       })
+    }else{
+        res.status(200).json({
+        success:true,
+        message:"Your bookings retrieved successfully",
+        data:result
+    })
+    }
 
     }
     

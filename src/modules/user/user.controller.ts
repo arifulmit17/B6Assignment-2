@@ -25,7 +25,7 @@ const updateUser=async (req:Request,res:Response)=>{
     try{
     const result = await userService.updateUserFromDB(req)
     
-    console.log(result);
+    // console.log(result);
      
     if(result.rows.length===0){
        res.status(404).json({
@@ -51,7 +51,7 @@ const updateUser=async (req:Request,res:Response)=>{
    }
 }
 const deleteUser=async (req:Request,res:Response)=>{
-    console.log(req.params.id);
+    // console.log(req.params.id);
     try{
     const result = await userService.deleteUserFromDB(req)
     
