@@ -5,9 +5,9 @@ import { bookingsController } from "./bookings.controller";
 
 const router = Router();
 
-router.post('/bookings/:bookingId',bookingsController.createBookings);
+router.post('/bookings',bookingsController.createBookings);
 router.get('/bookings',bookingsController.getAllBookings);
 router.put('/bookings/:bookingId',bookingsController.updateBooking);
 
 
-export const userRoute= router;
+export const bookingsRoute= router;

@@ -1,27 +1,54 @@
+import { pool } from "../../database/db"
+import { vehicleService } from "../vehicles/vehicles.service"
 
 
 
 const createBookingIntoDB=async(payload:Record<string,unknown>)=>{
- const {customer_id,vehicle_id,rent_start_date,rent_end_date}=payload
+ let {customer_id,vehicle_id,rent_start_date,rent_end_date,status}=payload
+ if(!status){
+   status="active"
+ }else{
+    status="cancelled"
+ }
+ const vehicle=await pool.query(`SELECT * FROM vehicles WHERE id=$1 `,[vehicle_id])
+ const {vehicle_name,daily_rent_price}=vehicle.rows[0]
+ const start = new Date(rent_start_date).getTime();
+const end = new Date(rent_end_date).getTime();
+
+if (isNaN(start) || isNaN(end)) {
+  throw new Error("Invalid date format");
+}
+
+const number_of_days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+console.log("Days:", number_of_days);
+
+if (end <= start) {
+  throw new Error("End date must be after start date");
+}
+
+
+const total_price = daily_rent_price * number_of_days
+ console.log(payload);
+
  
- if(price >= 0){
-    if(type =='car' || type =='bike' || type =='van' || type =='SUV' ){
-        if(availability_status =='available' || availability_status =='booked'){
-       const result= await pool.query(
-         `INSERT INTO bookings (customer_id,vehicle_id,rent_start_date,rent_end_date) VALUES ($1, $2,$3,$4) RETURNING *`,[customer_id,vehicle_id,rent_start_date,rent_end_date]
+   
+        if(status =='active' || status =='cancelled' || status=='returned'){
+       let result= await pool.query(
+        `INSERT INTO bookings (customer_id,vehicle_id,rent_start_date,rent_end_date,total_price,status) VALUES ($1, $2,$3,$4,$5,$6) RETURNING *`,[customer_id,vehicle_id,rent_start_date,rent_end_date,total_price,status]
     )
-return result
+    const booking={
+  ...result.rows[0],
+  vehicle: {vehicle_name,daily_rent_price},
+}
+console.log(booking);
+return booking
 }else{
     throw new Error("Invalid availability status. It should be either 'available' or 'booked'.")
 }
     
-    }else{
-        throw new Error("Invalid vehicle type. It should be either 'car', 'bike', 'van', or 'SUV'.")
-    }
 
- }else{
-    throw new Error("Daily rent price must be a non-negative number.")
- }
+ 
 }
 
 const getAllBookingFromDB=async ()=>{
