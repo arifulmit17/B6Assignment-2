@@ -1,3 +1,4 @@
+import { Request } from "express"
 import { pool } from "../../database/db"
 
 
@@ -52,7 +53,7 @@ return booking
 }
 
 const getAllBookingFromDBCustomer=async (userid)=>{
-    console.log(userid);
+    // console.log(userid);
    const result= await pool.query(
             `SELECT * FROM bookings WHERE customer_id=$1`,[userid]
        )
@@ -75,7 +76,7 @@ for (let i = 0; i < result.rows.length; i++) {
 
   bookings.push(combined);
 }
-console.log(bookings);
+// console.log(bookings);
 return bookings;
 
     
@@ -112,7 +113,7 @@ for (let i = 0; i < result.rows.length; i++) {
 
   bookings.push(combined);
 }
-console.log(bookings);
+// console.log(bookings);
 return bookings;
 
     
@@ -120,32 +121,45 @@ return bookings;
 }
 
 const updateBookingFromDB=async (req:Request)=>{
-   const {vehicle_name,type,registration_number,daily_rent_price,availability_status}=req.body
- const price = Number(daily_rent_price);
- if(price >= 0){
-    if(type =='car' || type =='bike' || type =='van' || type =='SUV' ){
-        if(availability_status =='available' || availability_status =='booked'){
+   const {status}=req.body
+ 
+ 
+    
+        if(status =='active' || status =='cancelled' || status=='returned'){
        const result= await pool.query(
-         `UPDATE vehicles SET vehicle_name=$1,type=$2,registration_number=$3,daily_rent_price=$4,availability_status=$5 WHERE id=$6 RETURNING *`,[vehicle_name,type,registration_number,daily_rent_price,availability_status,req.params.vehicleId]
+         `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,[status,req.params.bookingId]
     )
 return result
 }else{
-    throw new Error("Invalid availability status. It should be either 'available' or 'booked'.")
+    throw new Error("Invalid availability status.")
 }
     
-    }else{
-        throw new Error("Invalid vehicle type. It should be either 'car', 'bike', 'van', or 'SUV'.")
+    }
+const updateBookingFromDBCustomer=async (req:Request,userid)=>{
+   const {status}=req.body
+//    console.log("booking id",req.params.bookingId);
+//    console.log(userid);
+ 
+ 
+    
+        if(status =='active' || status =='cancelled' || status=='returned'){
+       const result= await pool.query(
+         `UPDATE bookings SET status=$1 WHERE customer_id=$2 AND id=$3 RETURNING *`,[status,userid,req.params.bookingId]
+    )
+return result
+}else{
+    throw new Error("Invalid availability status.")
+}
+    
     }
 
- }else{
-    throw new Error("Daily rent price must be a non-negative number.")
- }
-}
+
 
 export const bookingsService={
     createBookingIntoDB,
     getAllBookingFromDBCustomer,
     getAllBookingFromDB,
-    updateBookingFromDB
+    updateBookingFromDB,
+    updateBookingFromDBCustomer
    
 }

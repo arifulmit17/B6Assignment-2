@@ -34,14 +34,14 @@ const loginUserIntoDB=async(email:string,password:string)=>{
         return null
     }
     const user=result.rows[0]
-    console.log(user);
+    // console.log(user);
     const match=await bcrypt.compare(password,user.password)
     // console.log({match,user});
     if(match==false){
         return false
     }
     const token=jwt.sign({id:user.id,name:user.name,email:user.email,role:user.role},config.jwtSecret as string,{expiresIn:'7d'})
-    console.log(token);
+    // console.log(token);
     return {token,user}
 
 

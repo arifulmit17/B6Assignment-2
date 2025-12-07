@@ -45,7 +45,7 @@ const getAllBookings=async (req:Request,res:Response)=>{
 }
     if(userrole=="customer"){
         const result = await bookingsService.getAllBookingFromDBCustomer(userid)
-        console.log(result);
+        // console.log(result);
         if(result.length===0){
        res.status(404).json({
         success:false,
@@ -72,8 +72,12 @@ const getAllBookings=async (req:Request,res:Response)=>{
 }
 
 const updateBooking=async (req:Request,res:Response)=>{
+    const userrole=req.user?.role
+    const userid=req.user?.id
+    console.log(userrole);
     try{
-    const result = await bookingsService.updateBookingFromDB(req)
+    if(userrole=="admin"){
+        const result = await bookingsService.updateBookingFromDB(req)
     
     console.log(result);
      
@@ -86,10 +90,33 @@ const updateBooking=async (req:Request,res:Response)=>{
     else{
         res.status(200).json({
             success:true,
-            message:"Booking updated successfully",
+            message:"Booking marked as returned. Vehicle is now available",
             data:result.rows[0]
         })
        }
+
+    }
+    if(userrole=="customer"){
+        const result = await bookingsService.updateBookingFromDBCustomer(req,userid)
+    
+    console.log(result);
+     
+    if(result.rows.length===0){
+       res.status(404).json({
+        success:false,
+        message:"Booking not found"
+       })
+    }
+    else{
+        res.status(200).json({
+            success:true,
+            message:"Booking cancelled successfully",
+            data:result.rows[0]
+        })
+       }
+
+    }
+    
     
 
    }catch(err:any){
