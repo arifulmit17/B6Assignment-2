@@ -1,6 +1,6 @@
 Project name: Vehicle booking system
 
-Live url:
+Live url: https://b6-assignment-2-nu.vercel.app/
 
 Features:
 1. Roll based user authentication.
