@@ -87,7 +87,7 @@ const updateVehicle=async (req:Request,res:Response)=>{
 }
 const deleteVehicle=async (req:Request,res:Response)=>{
     try{
-    const result = await vehicleService.deleteVehicleFromDB(req)
+    const result = await vehicleService.deleteVehicleFromDB(req,res)
     
      
     if(result.rows.length===0){

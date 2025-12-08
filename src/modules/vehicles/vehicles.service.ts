@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs"
 import { pool } from "../../database/db"
-import { Request } from "express";
+import { Request, Response } from "express";
 
 
 const createVehicleIntoDB=async(payload:Record<string,unknown>)=>{
@@ -65,11 +65,36 @@ return result
     throw new Error("Daily rent price must be a non-negative number.")
  }
 }
-const deleteVehicleFromDB=async (req:Request)=>{
-   const result= await pool.query(
+const deleteVehicleFromDB=async (req:Request,res:Response)=>{
+    const vehicle= await pool.query(
+            `SELECT * FROM vehicles WHERE id=$1 `,[req.params.vehicleId]
+       )
+       console.log(vehicle.rows[0].availability_status);
+    try{
+        if(vehicle.rows[0].availability_status=="available"){
+            const result= await pool.query(
             `DELETE FROM vehicles WHERE id=$1 RETURNING *`,[req.params.vehicleId]
        )
+       console.log("result",result);
     return result
+
+        }else{
+            res.status(500).json({
+        success:false,
+        message:"vehicle is booked ,cannot delete"
+
+       })
+        }
+        
+
+    }catch(err){
+       res.status(500).json({
+        success:false,
+        message:"vehicle not deleted"
+
+       })
+    }
+   
 }
 
 export const vehicleService={
