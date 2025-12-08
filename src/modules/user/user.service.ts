@@ -14,10 +14,12 @@ const getAllUserFromDB=async ()=>{
 }
 const updateUserFromDB=async (req:Request)=>{
     const {name,email,phone,role}=req.body
+    console.log(name,email,phone,role);
+    console.log(req.params.userid);
    const result= await pool.query(
-            `UPDATE users SET name=$1 ,email=$2, phone=$3, role=$4 WHERE id=$5 RETURNING *`,[name,email,phone,role,req.params.id]
+            `UPDATE users SET name=$1 ,email=$2, phone=$3, role=$4 WHERE id=$5 RETURNING *`,[name,email,phone,role,req.params.userid]
        )
-
+    console.log(result.rows[0]);
     delete result.rows[0].password
     return result
 }
