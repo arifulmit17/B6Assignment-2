@@ -69,13 +69,13 @@ const deleteVehicleFromDB=async (req:Request,res:Response)=>{
     const vehicle= await pool.query(
             `SELECT * FROM vehicles WHERE id=$1 `,[req.params.vehicleId]
        )
-       console.log(vehicle.rows[0].availability_status);
+    //    console.log(vehicle.rows[0].availability_status);
     try{
         if(vehicle.rows[0].availability_status=="available"){
             const result= await pool.query(
             `DELETE FROM vehicles WHERE id=$1 RETURNING *`,[req.params.vehicleId]
        )
-       console.log("result",result);
+    //    console.log("result",result);
     return result
 
         }else{

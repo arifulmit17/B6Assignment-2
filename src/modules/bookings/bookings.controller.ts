@@ -12,7 +12,7 @@ const createBookings=async (req:Request ,res:Response)=>{
         data:result
     })
     } catch (error: any) {
-        res.status(500).json({
+        res.status(404).json({
             success:false,
             message:error.message,
             error:error
@@ -74,14 +74,20 @@ const getAllBookings=async (req:Request,res:Response)=>{
 const updateBooking=async (req:Request,res:Response)=>{
     const userrole=req.user?.role
     const userid=req.user?.id
-    console.log(userrole);
+     const id=req.params.bookingId
+        const booking=await bookingsService.getBookingById(id as string)
+        const rentStart = new Date(booking.rent_start_date).getTime();
+        const rentEnd = new Date(booking.rent_end_date).getTime();
+    // console.log(userrole);
     try{
+
+     
     if(userrole=="admin"){
         const result = await bookingsService.updateBookingFromDB(req)
     
-    console.log(result);
+    // console.log(result);
      
-    if(result.rows.length===0){
+    if(!result){
        res.status(404).json({
         success:false,
         message:"Booking not found"
@@ -91,17 +97,37 @@ const updateBooking=async (req:Request,res:Response)=>{
         res.status(200).json({
             success:true,
             message:"Booking marked as returned. Vehicle is now available",
-            data:result.rows[0]
+            data:result
         })
        }
 
     }
     if(userrole=="customer"){
-        const result = await bookingsService.updateBookingFromDBCustomer(req,userid)
-    
-    console.log(result);
-     
-    if(result.rows.length===0){
+
+        if(Date.now() > rentEnd){
+        // console.log(Date.now(),rentEnd);
+             
+             const result = await bookingsService.updateBookingFromDBSystem(req)
+             if(!result){
+       res.status(404).json({
+        success:false,
+        message:"Booking not found"
+       })
+    }
+    else{
+        res.status(200).json({
+            success:true,
+            message:"Booking marked as returned by system. Vehicle is now available",
+            data:result
+        })
+       }
+
+        }  
+       
+        // console.log(Date.now(),rentStart);
+        if(Date.now() < rentStart){
+          const result = await bookingsService.updateBookingFromDBCustomer(req,userid)
+          if(result.rows.length===0){
        res.status(404).json({
         success:false,
         message:"Booking not found"
@@ -114,6 +140,17 @@ const updateBooking=async (req:Request,res:Response)=>{
             data:result.rows[0]
         })
        }
+        }else{
+            res.status(400).json({
+            success:false,
+            message:"Booking cannot be cancelled as rent period started",
+            
+        })
+        }
+        
+    
+     
+    
 
     }
     

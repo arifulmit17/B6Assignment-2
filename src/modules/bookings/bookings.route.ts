@@ -5,9 +5,9 @@ import auth from "../../middleware/auth";
 
 
 const router = Router();
-
-router.post('/bookings',auth(),bookingsController.createBookings);
 // router.get('/bookings',auth("customer"),bookingsController.getAllBookings);
+router.post('/bookings',auth(),bookingsController.createBookings);
+
 router.get('/bookings',auth(),bookingsController.getAllBookings);
 
 router.put('/bookings/:bookingId',auth(),bookingsController.updateBooking);

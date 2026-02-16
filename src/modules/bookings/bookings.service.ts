@@ -5,14 +5,27 @@ import { pool } from "../../database/db"
 
 
 const createBookingIntoDB=async(payload:Record<string,unknown>)=>{
+  try{
  let {customer_id,vehicle_id,rent_start_date,rent_end_date,status}=payload
  if(!status){
    status="active"
  }else{
     status="cancelled"
  }
- const vehicle=await pool.query(`SELECT * FROM vehicles WHERE id=$1 `,[vehicle_id])
- const {vehicle_name,daily_rent_price}=vehicle.rows[0]
+ const result = await pool.query(
+  `SELECT * FROM vehicles WHERE id = $1`,
+  [vehicle_id]
+)
+// console.log(result);
+
+const vehicle = result.rows[0]
+
+if (!vehicle) {
+  throw new Error("Vehicle not found")
+}
+
+const { vehicle_name, daily_rent_price } = vehicle
+
  const start = new Date(rent_start_date).getTime();
 const end = new Date(rent_end_date).getTime();
 
@@ -47,7 +60,10 @@ return booking
 }else{
     throw new Error("Invalid availability status")
 }
-    
+}
+catch (error : any) {
+  throw new Error(error.message || "Failed to create booking")
+}
 
  
 }
@@ -83,6 +99,7 @@ return bookings;
     
 }
 const getAllBookingFromDB=async ()=>{
+
    const result= await pool.query(
             `SELECT * FROM bookings`
        )
@@ -91,6 +108,7 @@ const getAllBookingFromDB=async ()=>{
     const bookings: any[] = [];
 
 for (let i = 0; i < result.rows.length; i++) {
+  
   const booking = result.rows[i];
 
   const customerRes = await pool.query(
@@ -102,7 +120,7 @@ for (let i = 0; i < result.rows.length; i++) {
     "SELECT * FROM vehicles WHERE id=$1",
     [booking.vehicle_id]
   );
-  const {vehicle_name,registration_number}=vehicleRes.rows[0]
+  const {vehicle_name,registration_number}=vehicleRes?.rows[0]
   const {name,email}=customerRes.rows[0]
   
   const combined = {
@@ -112,29 +130,98 @@ for (let i = 0; i < result.rows.length; i++) {
   };
 
   bookings.push(combined);
+
 }
 // console.log(bookings);
 return bookings;
-
+  
+  
     
     
 }
 
-const updateBookingFromDB=async (req:Request)=>{
-   const {status}=req.body
- 
- 
-    
-        if(status =='active' || status =='cancelled' || status=='returned'){
-       const result= await pool.query(
-         `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,[status,req.params.bookingId]
-    )
-return result
-}else{
-    throw new Error("Invalid availability status.")
+const getBookingById=async(bookingId:string)=>{
+
+ const result = await pool.query(
+  `SELECT * FROM bookings WHERE id=$1`,
+  [bookingId]
+  
+);
+
+  const booking = result.rows[0];
+
+if (!booking) {
+  throw new Error("Booking not found");
 }
-    
-    }
+
+return booking;
+
+}
+
+const updateBookingFromDB = async (req: Request) => {
+  const { status } = req.body;
+
+  if (status !== "active" && status !== "cancelled" && status !== "returned") {
+    throw new Error("Invalid availability status.");
+  }
+
+  const result = await pool.query(
+    `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,
+    [status, req.params.bookingId]
+  );
+
+  const booking = result.rows[0];
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  const vehicleRes = await pool.query(
+    `SELECT availability_status FROM vehicles WHERE id=$1`,
+    [booking.vehicle_id]
+  );
+
+  const vehicle = vehicleRes.rows[0];
+  const combined={
+ ...booking,
+    vehicle: {
+      availability_status: vehicle?.availability_status || null,
+    },
+  }
+  return combined;
+};
+const updateBookingFromDBSystem = async (req: Request) => {
+  const  status  = "returned";
+
+  
+
+  const result = await pool.query(
+    `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,
+    [status, req.params.bookingId]
+  );
+
+  const booking = result.rows[0];
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  const vehicleRes = await pool.query(
+    `SELECT availability_status FROM vehicles WHERE id=$1`,
+    [booking.vehicle_id]
+  );
+
+  const vehicle = vehicleRes.rows[0];
+  const combined={
+ ...booking,
+    vehicle: {
+      availability_status: vehicle?.availability_status || null,
+    },
+  }
+  return combined;
+};
+
+
 const updateBookingFromDBCustomer=async (req:Request,userid)=>{
    const {status}=req.body
 //    console.log("booking id",req.params.bookingId);
@@ -159,7 +246,9 @@ export const bookingsService={
     createBookingIntoDB,
     getAllBookingFromDBCustomer,
     getAllBookingFromDB,
+    getBookingById,
     updateBookingFromDB,
-    updateBookingFromDBCustomer
+    updateBookingFromDBCustomer,
+    updateBookingFromDBSystem,
    
 }
