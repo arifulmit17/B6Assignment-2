@@ -3,14 +3,40 @@ import { Request, Response } from "express"
 import { bookingsService } from "./bookings.service"
 
 const createBookings=async (req:Request ,res:Response)=>{
+    const {vehicle_id}=req.body
+    let isBooked=false
+    // console.log(vehicle_id);
+    
+    
+    
     try {
-       
-     const result=await bookingsService.createBookingIntoDB(req.body)
-    return res.status(201).json({
+        let booked=null
+       try {
+        booked = await bookingsService.getBookingByVehicleId(vehicle_id);
+    } catch (error: any) {
+      if (error.message !== "Booking not found") {
+        throw error; // real unexpected error
+      }
+    }
+        
+    
+       if(!booked || booked.status !== "active"){
+        const result=await bookingsService.createBookingIntoDB(req.body)
+        return res.status(201).json({
         success:true,
         message:"Booking created successfully",
         data:result
     })
+
+       }else{
+        return res.status(400).json({
+        success:false,
+        message:"Vehicle already booked",
+        
+    })
+
+       }
+     
     } catch (error: any) {
         res.status(404).json({
             success:false,

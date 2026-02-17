@@ -157,6 +157,23 @@ if (!booking) {
 return booking;
 
 }
+const getBookingByVehicleId=async(vehicleId:string)=>{
+
+ const result = await pool.query(
+  `SELECT * FROM bookings WHERE vehicle_id=$1`,
+  [vehicleId]
+  
+);
+
+  const booking = result.rows[0];
+
+if (!booking) {
+  throw new Error("Booking not found");
+}
+
+return booking;
+
+}
 
 const updateBookingFromDB = async (req: Request) => {
   const { status } = req.body;
@@ -247,6 +264,7 @@ export const bookingsService={
     getAllBookingFromDBCustomer,
     getAllBookingFromDB,
     getBookingById,
+    getBookingByVehicleId,
     updateBookingFromDB,
     updateBookingFromDBCustomer,
     updateBookingFromDBSystem,
